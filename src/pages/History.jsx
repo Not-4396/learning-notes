@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
+import { getUser } from '../hooks/useAuth'
 import { getSummaryList } from '../utils/api'
 import { formatDate } from '../utils/date'
 
-export default function History() {
-  const { userInfo } = useAuth()
-  const navigate = useNavigate()
+export default function History({ onBack }) {
   const [notes, setNotes] = useState([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
@@ -17,7 +14,9 @@ export default function History() {
   async function loadNotes() {
     setLoading(true)
     try {
-      const all = await getSummaryList(userInfo.openid)
+      const u = getUser()
+      if (!u) return
+      const all = await getSummaryList(u.openid)
       const paged = all.slice(0, page * 20)
       setNotes(paged.map(item => ({
         date_key: item.date_key,
@@ -40,13 +39,13 @@ export default function History() {
   return (
     <div className="page" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <div style={{ background: '#4A90D9', color: 'white', padding: '12px 16px', display: 'flex', alignItems: 'center' }}>
-        <span style={{ marginRight: 12, cursor: 'pointer' }} onClick={() => navigate('/home')}>&larr;</span>
+        {onBack && <span style={{ marginRight: 12, cursor: 'pointer' }} onClick={onBack}>&larr;</span>}
         <span style={{ fontSize: 17, fontWeight: 'bold' }}>历史笔记</span>
       </div>
 
       <div style={{ flex: 1, overflow: 'auto', padding: 16 }} onScroll={handleScroll}>
         {notes.map(item => (
-          <div key={item.date_key} onClick={() => navigate(`/report/${item.date_key}`)}
+          <div key={item.date_key} onClick={() => { location.hash = '#/report/' + item.date_key }}
             style={{ padding: 14, marginBottom: 8, background: 'white', borderRadius: 12, cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>

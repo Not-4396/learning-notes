@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { getDailyReport, shareReport, generateSummary } from '../utils/api'
 import MindMap from '../components/MindMap'
@@ -7,7 +7,6 @@ import MindMap from '../components/MindMap'
 export default function Report() {
   const { date } = useParams()
   const { userInfo } = useAuth()
-  const navigate = useNavigate()
   const [tree, setTree] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showDownload, setShowDownload] = useState(false)
@@ -25,7 +24,7 @@ export default function Report() {
   }
 
   function handleLeafTap(node) {
-    navigate(`/topic/${date}/${node.id}?label=${encodeURIComponent(node.label || '')}&detail=${encodeURIComponent(node.detail || '')}`)
+    location.hash = `#/topic/${date}/${node.id}?label=${encodeURIComponent(node.label || '')}&detail=${encodeURIComponent(node.detail || '')}`
   }
 
   async function handleShare() {
@@ -75,7 +74,7 @@ export default function Report() {
   return (
     <div className="page">
       <div style={{ background: '#4A90D9', color: 'white', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 17, fontWeight: 'bold' }} onClick={() => navigate('/home')}>&larr; {date}</span>
+        <span style={{ fontSize: 17, fontWeight: 'bold' }} onClick={() => { location.hash = '#/home' }}>&larr; {date}</span>
         <span style={{ fontSize: 14 }}>{tree?.children?.length || 0} 个主题</span>
       </div>
 
@@ -94,7 +93,7 @@ export default function Report() {
           {showDownload && (
             <div style={{ margin: '0 16px', background: 'white', borderRadius: 12, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
               <button style={{ width: '100%', padding: 14, border: 'none', borderBottom: '1px solid #eee', background: 'white', fontSize: 14, cursor: 'pointer' }} onClick={downloadMarkdown}>导出思维导图(Markdown)</button>
-              <button style={{ width: '100%', padding: 14, border: 'none', background: 'white', fontSize: 14, cursor: 'pointer' }} onClick={() => { setShowDownload(false); navigate(`/topic/${date}/${tree.id || 'root'}?label=${encodeURIComponent(tree.label || '')}`) }}>查看文字版</button>
+              <button style={{ width: '100%', padding: 14, border: 'none', background: 'white', fontSize: 14, cursor: 'pointer' }} onClick={() => { setShowDownload(false); location.hash = `#/topic/${date}/${tree.id || 'root'}?label=${encodeURIComponent(tree.label || '')}` }}>查看文字版</button>
             </div>
           )}
         </>

@@ -1,13 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
-import { useAuth } from '../hooks/useAuth'
+import { getUser } from '../hooks/useAuth'
 import { getSummaryList, getUserScores, generateSummary, pollGenerate } from '../utils/api'
 import { formatDate, getToday } from '../utils/date'
 import RadarChart from '../components/RadarChart'
 
-function nav(path) { location.hash = '#' + path }
-
-export default function Home() {
-  const { userInfo, logout, updateNickname } = useAuth()
+export default function Home({ onChat, onHistory, onLogout, onUpdateNickname, userInfo }) {
   const [dates, setDates] = useState([])
   const [scores, setScores] = useState({})
   const [loading, setLoading] = useState(true)
@@ -26,11 +23,13 @@ export default function Home() {
   }, [userInfo])
 
   async function loadData() {
+    const u = getUser()
+    if (!u) return
     setLoading(true)
     try {
       const [list, scoreRes] = await Promise.all([
-        getSummaryList(userInfo.openid),
-        getUserScores(userInfo.openid)
+        getSummaryList(u.openid),
+        getUserScores(u.openid)
       ])
       setDates(list.map(d => ({
         date_key: d.date_key,
@@ -44,9 +43,11 @@ export default function Home() {
   }
 
   async function handleGenerate(dateKey) {
+    const u = getUser()
+    if (!u) return
     setGenerating(true)
     try {
-      const res = await generateSummary(dateKey, userInfo.openid)
+      const res = await generateSummary(dateKey, u.openid)
       if (!res.ok) throw new Error(res.error)
       const result = await pollWithTimeout(res.task_id)
       alert(`生成完成: ${result.topic_count}个主题`)
@@ -77,7 +78,6 @@ export default function Home() {
   }
 
   function handleGeneratePress() {
-    const items = ['生成今天的笔记', '选择日期生成']
     const choice = prompt('选择操作:\n1. 生成今天的笔记\n2. 选择日期生成\n输入 1 或 2:')
     if (choice === '1') {
       handleGenerate(getToday())
@@ -94,10 +94,10 @@ export default function Home() {
   function handleUserMenu() {
     const action = prompt('1. 修改昵称\n2. 退出登录\n输入 1 或 2:')
     if (action === '1') {
-      const newName = prompt('输入新昵称:', userInfo.nickName)
-      if (newName && newName.trim()) updateNickname(newName.trim())
+      const newName = prompt('输入新昵称:', userInfo?.nickName)
+      if (newName && newName.trim() && onUpdateNickname) onUpdateNickname(newName.trim())
     } else if (action === '2') {
-      if (confirm('确定要退出登录吗？')) logout()
+      if (confirm('确定要退出登录吗？') && onLogout) onLogout()
     }
   }
 
@@ -117,9 +117,9 @@ export default function Home() {
       </div>
 
       <div style={{ display: 'flex', gap: 10, padding: '16px', justifyContent: 'center' }}>
-        <button className="btn" onClick={() => nav('/chat')}>AI 对话</button>
+        <button className="btn" onClick={onChat}>AI 对话</button>
         <button className="btn secondary" onClick={handleGeneratePress} disabled={generating}>{generating ? '生成中...' : '生成笔记'}</button>
-        <button className="btn secondary" onClick={() => nav('/history')}>历史笔记</button>
+        <button className="btn secondary" onClick={onHistory}>历史笔记</button>
       </div>
 
       {userInfo && (
@@ -137,7 +137,7 @@ export default function Home() {
       {dates.length > 0 ? (
         <div style={{ padding: '0 16px' }}>
           {dates.map(item => (
-            <div key={item.date_key} onClick={() => nav(`/report/${item.date_key}`)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', marginBottom: 8, background: 'white', borderRadius: 12, cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+            <div key={item.date_key} onClick={() => { location.hash = '#/report/' + item.date_key }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', marginBottom: 8, background: 'white', borderRadius: 12, cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
               <div>
                 <div style={{ fontSize: 15, fontWeight: 500 }}>{item.display_date}</div>
                 <div style={{ fontSize: 12, color: '#999' }}>{item.date_key}</div>

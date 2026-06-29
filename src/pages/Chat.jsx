@@ -4,7 +4,7 @@ import { sendMessage, pollReply, getChatHistory, generateSummary, pollGenerate }
 import { markdownToHtml } from '../utils/markdown'
 import { getToday } from '../utils/date'
 
-export default function Chat() {
+export default function Chat({ onBack }) {
   const [messages, setMessages] = useState([])
   const [inputText, setInputText] = useState('')
   const [loading, setLoading] = useState(false)
@@ -102,6 +102,7 @@ export default function Chat() {
   return (
     <div className="page" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <div style={{ background: '#4A90D9', color: 'white', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {onBack && <span style={{ marginRight: 12, cursor: 'pointer' }} onClick={onBack}>&larr;</span>}
         <span style={{ fontSize: 17, fontWeight: 'bold' }}>AI 学习助手</span>
         <div style={{ display: 'flex', gap: 12 }}>
           <span style={{ cursor: 'pointer', fontSize: 14 }} onClick={() => { if (confirm('清空对话？')) setMessages([]) }}>清空</span>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { getDailyReport } from '../utils/api'
 
@@ -7,7 +7,6 @@ export default function Topic() {
   const { date, topicId } = useParams()
   const [searchParams] = useSearchParams()
   const { userInfo } = useAuth()
-  const navigate = useNavigate()
   const [label, setLabel] = useState(searchParams.get('label') || '')
   const [detail, setDetail] = useState(searchParams.get('detail') || '')
   const [children, setChildren] = useState([])
@@ -70,7 +69,7 @@ export default function Topic() {
   return (
     <div className="page">
       <div style={{ background: '#4A90D9', color: 'white', padding: '12px 16px', display: 'flex', alignItems: 'center' }}>
-        <span style={{ marginRight: 12, cursor: 'pointer' }} onClick={() => navigate(-1)}>&larr;</span>
+        <span style={{ marginRight: 12, cursor: 'pointer' }} onClick={() => { location.hash = '#/home' }}>&larr;</span>
         <span style={{ fontSize: 16, fontWeight: 'bold' }}>{decodeURIComponent(label)}</span>
       </div>
 
@@ -89,7 +88,7 @@ export default function Topic() {
               <div style={{ marginBottom: 16 }}>
                 <h4 style={{ fontSize: 14, color: '#4A90D9', marginBottom: 10 }}>子主题</h4>
                 {children.map(child => (
-                  <div key={child.id} onClick={() => navigate(`/topic/${date}/${child.id}?label=${encodeURIComponent(child.label || '')}&detail=${encodeURIComponent(child.detail || '')}`)}
+                  <div key={child.id} onClick={() => { location.hash = `#/topic/${date}/${child.id}?label=${encodeURIComponent(child.label || '')}&detail=${encodeURIComponent(child.detail || '')}` }}
                     style={{ padding: '12px 14px', marginBottom: 6, background: 'white', borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
                     <span style={{ fontSize: 14 }}>{child.label}</span>
                     <span style={{ color: '#ccc' }}>&rarr;</span>
