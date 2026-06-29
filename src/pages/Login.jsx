@@ -1,41 +1,25 @@
-import { useState, useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
+import { useState } from 'react'
 import { loginUser } from '../utils/api'
 
-export default function Login() {
-  const { userInfo, login } = useAuth()
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
+export default function Login({ onLogin }) {
   const [nickName, setNickName] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [loading, setLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
-
-  useEffect(() => {
-    if (userInfo?.nickName && userInfo.nickName !== '微信用户' && !searchParams.get('relogin')) {
-      navigate('/home', { replace: true })
-    }
-  }, [userInfo, navigate, searchParams])
 
   async function handleSubmit() {
     const name = nickName.trim()
     if (!name) { alert('请输入昵称'); return }
     setLoading(true)
     try {
-      // login() in useAuth creates openid — use that one for DB too
-      const user = login(name, avatarUrl)
-      const res = await loginUser(user.openid, name, avatarUrl)
-      if (!res.ok) {
-        alert('登录失败: ' + (res.error || '未知错误'))
-        return
-      }
-      setTimeout(() => navigate('/home', { replace: true }), 300)
+      const openid = 'local-user-' + Date.now()
+      const user = { openid, nickName: name, avatarUrl, _id: Date.now() }
+      localStorage.setItem('learning_notes_user', JSON.stringify(user))
+      await loginUser(openid, name, avatarUrl)
+      onLogin()
     } catch (err) {
       alert('登录失败: ' + err.message)
-    } finally {
-      setLoading(false)
-    }
+    } finally { setLoading(false) }
   }
 
   function handleAvatarChange(e) {

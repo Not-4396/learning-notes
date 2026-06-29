@@ -1,26 +1,22 @@
 import { useState, useEffect } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
 import { getDailyReport } from '../utils/api'
+import { getUser } from '../hooks/useAuth'
 
-export default function Topic() {
-  const { date, topicId } = useParams()
-  const [searchParams] = useSearchParams()
-  const { userInfo } = useAuth()
-  const [label, setLabel] = useState(searchParams.get('label') || '')
-  const [detail, setDetail] = useState(searchParams.get('detail') || '')
+export default function Topic({ date, topicId, searchParams: sp, onBack }) {
+  const [label, setLabel] = useState(sp?.get('label') || '')
+  const [detail, setDetail] = useState(sp?.get('detail') || '')
   const [children, setChildren] = useState([])
   const [excerpts, setExcerpts] = useState([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    loadDetail()
-  }, [date, topicId])
+  useEffect(() => { loadDetail() }, [date, topicId])
 
   async function loadDetail() {
     setLoading(true)
     try {
-      const res = await getDailyReport(date, userInfo.openid)
+      const u = getUser()
+      if (!u) return
+      const res = await getDailyReport(date, u.openid)
       if (res.ok) {
         const topic = findNode(res.data.tree, topicId)
         if (topic) {
@@ -45,31 +41,10 @@ export default function Topic() {
     return null
   }
 
-  function treeToHtml(node, depth = 0) {
-    let html = ''
-    if (depth === 0) {
-      if (node.children) node.children.forEach(c => { html += treeToHtml(c, depth + 1) })
-      return html
-    }
-    const style = depth === 1 ? 'color:#4A90D9;font-size:18px;font-weight:bold;border-left:4px solid #4A90D9;padding-left:10px;margin:20px 0 8px'
-      : depth === 2 ? 'color:#5BA85B;font-size:16px;font-weight:bold;margin:15px 0 6px'
-      : depth === 3 ? 'color:#E8A838;font-size:14px;font-weight:bold;margin:10px 0 4px'
-      : 'font-size:14px;margin:5px 0'
-    html += `<div style="${style}">${node.label || ''}</div>`
-    if (node.summary) html += `<div style="color:#666;font-style:italic;margin:2px 0 8px;font-size:13px">${node.summary}</div>`
-    if (node.detail) html += `<div style="margin:2px 0 8px;font-size:13px">${node.detail}</div>`
-    if (node.children) {
-      html += `<div style="padding-left:${depth > 1 ? 15 : 0}px">`
-      node.children.forEach(c => { html += treeToHtml(c, depth + 1) })
-      html += '</div>'
-    }
-    return html
-  }
-
   return (
     <div className="page">
       <div style={{ background: '#4A90D9', color: 'white', padding: '12px 16px', display: 'flex', alignItems: 'center' }}>
-        <span style={{ marginRight: 12, cursor: 'pointer' }} onClick={() => { location.hash = '#/home' }}>&larr;</span>
+        <span style={{ marginRight: 12, cursor: 'pointer' }} onClick={onBack}>&larr;</span>
         <span style={{ fontSize: 16, fontWeight: 'bold' }}>{decodeURIComponent(label)}</span>
       </div>
 

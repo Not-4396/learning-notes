@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
 import { getSharedReport } from '../utils/api'
 import MindMap from '../components/MindMap'
 
-export default function Share() {
-  const { token } = useParams()
+export default function Share({ token }) {
   const [tree, setTree] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -13,16 +11,14 @@ export default function Share() {
     if (token) loadShared(token)
   }, [token])
 
-  async function loadShared(shareToken) {
+  async function loadShared(t) {
     try {
-      const res = await getSharedReport(shareToken)
-      if (res.error) { setError(res.error); setLoading(false); return }
+      const res = await getSharedReport(t)
+      if (res.error) { setError(res.error); return }
       if (res.ok && res.data) { setTree(res.data.tree) }
     } catch (err) {
       setError('加载失败: ' + err.message)
-    } finally {
-      setLoading(false)
-    }
+    } finally { setLoading(false) }
   }
 
   if (loading) return <div className="page"><div style={{ textAlign: 'center', padding: 60, color: '#999' }}>加载中...</div></div>

@@ -1,12 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
 import { getDailyReport, shareReport, generateSummary } from '../utils/api'
 import MindMap from '../components/MindMap'
 
-export default function Report() {
-  const { date } = useParams()
-  const { userInfo } = useAuth()
+export default function Report({ date, userInfo, onBack }) {
   const [tree, setTree] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showDownload, setShowDownload] = useState(false)
@@ -31,11 +27,10 @@ export default function Report() {
     try {
       const res = await shareReport(date, userInfo.openid)
       if (res.ok) {
-        const link = `${window.location.origin}/share/${res.share_token}`
         if (navigator.share) {
-          await navigator.share({ title: `学习日报 ${date}`, text: '查看我的学习日报', url: link })
+          await navigator.share({ title: `学习日报 ${date}`, text: '查看我的学习日报', url: `${location.origin}/#/share/${res.share_token}` })
         } else {
-          await navigator.clipboard.writeText(link)
+          await navigator.clipboard.writeText(`${location.origin}/#/share/${res.share_token}`)
           alert(`分享链接已复制:\nToken: ${res.share_token}`)
         }
       } else { alert('生成失败: ' + (res.error || '')) }
@@ -46,10 +41,8 @@ export default function Report() {
     if (!confirm('将重新分析对话内容生成知识树，确定吗？')) return
     try {
       const res = await generateSummary(date, userInfo.openid)
-      if (res.ok) {
-        alert('已开始重新生成，请稍后刷新')
-        setTimeout(loadReport, 2000)
-      } else { alert('生成失败: ' + (res.error || '')) }
+      if (res.ok) { alert('已开始重新生成，请稍后刷新'); setTimeout(loadReport, 2000) }
+      else { alert('生成失败: ' + (res.error || '')) }
     } catch (err) { alert('生成失败: ' + err.message) }
   }
 
@@ -74,7 +67,7 @@ export default function Report() {
   return (
     <div className="page">
       <div style={{ background: '#4A90D9', color: 'white', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 17, fontWeight: 'bold' }} onClick={() => { location.hash = '#/home' }}>&larr; {date}</span>
+        <span style={{ fontSize: 17, fontWeight: 'bold', cursor: 'pointer' }} onClick={onBack}>&larr; {date}</span>
         <span style={{ fontSize: 14 }}>{tree?.children?.length || 0} 个主题</span>
       </div>
 
