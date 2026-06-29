@@ -94,7 +94,7 @@ export default function Home({ userInfo }) {
           <span style={{ fontSize: '0.9rem' }}>{userInfo?.nickName || '用户'}</span>
         </div>
         <span className="site-title">学习笔记</span>
-        <span className="site-subtitle">AI 对话学习 · 知识树日报</span>
+        <span className="site-subtitle">v2.0 · 自适应 · 右滑返回</span>
       </div>
 
       <div className="btn-row">
