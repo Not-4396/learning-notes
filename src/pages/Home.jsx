@@ -122,20 +122,9 @@ export default function Home({ userInfo }) {
       </div>
 
       <div style={{ display: 'flex', gap: 10, padding: '16px', justifyContent: 'center' }}>
-        <button className="btn"
-          onClick={goChat}
-          onTouchStart={goChat}
-          style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation', userSelect: 'none' }}
-        >AI 对话</button>
-        <button className="btn secondary"
-          onClick={handleGeneratePress}
-          disabled={generating}
-        >{generating ? '生成中...' : '生成笔记'}</button>
-        <button className="btn secondary"
-          onClick={goHistory}
-          onTouchStart={goHistory}
-          style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation', userSelect: 'none' }}
-        >历史笔记</button>
+        <button className="btn" onClick={goChat}>AI 对话</button>
+        <button className="btn secondary" onClick={handleGeneratePress} disabled={generating}>{generating ? '生成中...' : '生成笔记'}</button>
+        <button className="btn secondary" onClick={goHistory}>历史笔记</button>
       </div>
 
       {userInfo && (
