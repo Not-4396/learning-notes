@@ -1,9 +1,11 @@
-/* ─── Responsive base ─── */
-/* Font-size scales between 13px (320px screen) and 18px (430px+) */
+/* ─── Mobile-first base (320px-430px) ─── */
 html {
-  font-size: clamp(13px, 4.1vw, 18px);
+  font-size: 14px;
   -webkit-text-size-adjust: 100%;
 }
+@media (min-width: 380px) { html { font-size: 15px; } }
+@media (min-width: 430px) { html { font-size: 16px; } }
+@media (min-width: 768px) { html { font-size: 18px; } }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -19,31 +21,31 @@ html, body, #root, .app {
 .topbar {
   position: sticky; top: 0; z-index: 100;
   background: linear-gradient(135deg, #4A90D9, #357ABD); color: #fff;
-  padding: env(safe-area-inset-top, 0.5rem) 1rem 0.75rem;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding: 0.5rem env(safe-area-inset-right, 1rem) 0.75rem env(safe-area-inset-left, 1rem);
   display: flex; align-items: center; justify-content: space-between;
-  min-height: calc(3.2rem + env(safe-area-inset-top, 0px));
+  min-height: 3.2rem;
 }
 .topbar .title   { font-size: 1.1rem; font-weight: bold; }
-.topbar .back    { font-size: 1.3rem; cursor: pointer; padding: 0.4rem 0.6rem; min-width: 2.5rem; text-align: center; user-select: none; }
-.topbar .action  { font-size: 0.85rem; cursor: pointer; padding: 0.3rem 0.5rem; }
+.topbar .back    { font-size: 1.4rem; cursor: pointer; padding: 0.5rem 0.6rem; min-width: 2.8rem; text-align: center; user-select: none; -webkit-user-select: none; flex-shrink: 1; }
+.topbar .action  { font-size: 0.85rem; cursor: pointer; padding: 0.3rem 0.5rem; white-space: nowrap; }
 
-/* ─── Header banner (home page) ─── */
+/* ─── Header banner (home) ─── */
 .header {
   background: linear-gradient(135deg, #4A90D9, #357ABD); color: #fff;
-  padding: env(safe-area-inset-top, 1.2rem) 1rem 1.8rem; text-align: center;
+  padding: 1.5rem 1rem 1.8rem; text-align: center;
 }
 .header .user-row {
   display: flex; align-items: center; justify-content: center; gap: 0.5rem;
   margin-bottom: 0.5rem; cursor: pointer;
 }
 .header .user-avatar {
-  width: 2.2rem; height: 2.2rem; border-radius: 50%; object-fit: cover;
-  border: 2px solid rgba(255,255,255,0.5);
+  width: 2.2rem; height: 2.2rem; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.5);
 }
 .header .user-fallback {
   width: 2.2rem; height: 2.2rem; border-radius: 50%;
-  background: rgba(255,255,255,0.25); display: flex; align-items: center;
-  justify-content: center; font-size: 1rem; font-weight: bold;
+  background: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; font-weight: bold;
 }
 .header .site-title   { font-size: 1.3rem; font-weight: bold; display: block; margin-top: 0.4rem; }
 .header .site-subtitle { font-size: 0.8rem; opacity: 0.85; display: block; margin-top: 0.2rem; }
@@ -54,9 +56,9 @@ html, body, #root, .app {
 /* ─── Buttons ─── */
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
-  padding: 0.65rem 1.2rem; border-radius: 0.5rem;
+  padding: 0.7rem 1.3rem; border-radius: 0.5rem;
   font-size: 0.9rem; font-weight: 500; cursor: pointer; user-select: none;
-  border: none; background: #4A90D9; color: #fff;
+  border: none; background: #4A90D9; color: #fff; -webkit-tap-highlight-color: transparent;
   min-height: 2.6rem; min-width: 3rem;
 }
 .btn:active   { opacity: 0.7; }
@@ -83,17 +85,14 @@ html, body, #root, .app {
 /* ─── Chat messages ─── */
 .msg-row { display: flex; margin-bottom: 0.7rem; align-items: flex-start; }
 .msg-row.user  { flex-direction: row-reverse; }
-
 .msg-avatar {
   width: 1.8rem; height: 1.8rem; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.7rem; font-weight: bold; flex-shrink: 0;
-  color: #fff;
+  font-size: 0.7rem; font-weight: bold; flex-shrink: 0; color: #fff;
 }
 .msg-avatar.user  { background: #4A90D9; }
 .msg-avatar.ai    { background: #5BA85B; }
 .msg-avatar.error { background: #D94A4A; }
-
 .msg-bubble {
   max-width: 75%; margin: 0 0.5rem; padding: 0.6rem 0.8rem; border-radius: 0.7rem;
   font-size: 0.85rem; line-height: 1.6;
@@ -113,7 +112,6 @@ html, body, #root, .app {
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   display: flex; justify-content: space-between; align-items: center;
 }
-.card .card-left  { }
 .card .card-title { font-size: 0.9rem; font-weight: 500; }
 .card .card-date  { font-size: 0.7rem; color: #999; margin-top: 0.1rem; }
 .card .card-stat  { text-align: center; }
@@ -125,14 +123,14 @@ html, body, #root, .app {
 .section-title { font-weight: bold; font-size: 0.9rem; margin-bottom: 0.4rem; }
 .section-sub   { font-size: 0.7rem; color: #999; margin-left: 0.4rem; }
 
-/* ─── Share / Report buttons ─── */
-.action-row { display: flex; gap: 0.6rem; padding: 0.6rem 1rem; justify-content: center; }
+/* ─── Action row ─── */
+.action-row { display: flex; gap: 0.6rem; padding: 0.6rem 1rem; justify-content: center; flex-wrap: wrap; }
 .sheet { margin: 0 1rem; background: #fff; border-radius: 0.7rem; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 .sheet button { width: 100%; padding: 0.8rem; border: none; border-bottom: 1px solid #eee; background: #fff; font-size: 0.85rem; cursor: pointer; }
 .sheet button:last-child { border-bottom: none; }
 
 /* ─── Loading ─── */
-.loading-text { text-align: center; padding: 3rem; color: #999; }
+.loading-text { text-align: center; padding: 3rem; color: #999; font-size: 0.85rem; }
 
 /* ─── Login ─── */
 .login-page {
@@ -151,13 +149,11 @@ html, body, #root, .app {
 .login-card h3 { text-align: center; margin-bottom: 1.2rem; font-size: 1.05rem; }
 .login-card .avatar-wrap { text-align: center; margin-bottom: 1.2rem; }
 .login-card .avatar-img {
-  width: 4rem; height: 4rem; border-radius: 50%; object-fit: cover;
-  border: 3px solid #4A90D9;
+  width: 4rem; height: 4rem; border-radius: 50%; object-fit: cover; border: 3px solid #4A90D9;
 }
 .login-card .avatar-placeholder {
   width: 4rem; height: 4rem; border-radius: 50%; background: #e8e8e8;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.5rem; color: #999; margin: 0 auto;
+  display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #999; margin: 0 auto;
 }
 .login-card .login-input {
   width: 100%; padding: 0.65rem 0.8rem; border: 1px solid #ddd;
@@ -165,14 +161,13 @@ html, body, #root, .app {
 }
 .login-card .login-input:focus { border-color: #4A90D9; }
 
-/* ─── Radar chart container ─── */
+/* ─── Radar ─── */
 .radar-wrap { display: flex; justify-content: center; padding: 0.5rem 0; }
 
-/* ─── Sub-topic list ─── */
+/* ─── Sub-topic ─── */
 .subtopic {
   padding: 0.7rem 0.8rem; margin-bottom: 0.35rem; background: #fff;
-  border-radius: 0.55rem; cursor: pointer; display: flex;
-  align-items: center; justify-content: space-between;
+  border-radius: 0.55rem; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-size: 0.85rem;
 }
 .detail-box {

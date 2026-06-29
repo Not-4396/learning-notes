@@ -1,9 +1,10 @@
 import { useRef, useEffect } from 'react'
 
-// Right-edge swipe-left → go back. Common mobile gesture.
-const EDGE_WIDTH = 30  // px from right edge to detect swipe start
-const MIN_DELTA = 60   // px minimum swipe distance to trigger back
-const MAX_TIME = 400   // ms maximum swipe duration
+// Left-to-right swipe → go back (iOS / WeChat convention)
+// Does NOT conflict with Android system edge-back gesture.
+const MIN_DX = 80   // minimum horizontal pixel distance
+const MAX_DY = 60   // maximum vertical deviation (to avoid scroll conflict)
+const MAX_MS = 500  // maximum swipe duration
 
 export default function SwipeBack({ children, onBack }) {
   const startRef = useRef(null)
@@ -15,19 +16,20 @@ export default function SwipeBack({ children, onBack }) {
     if (!el) return
 
     function onTouchStart(e) {
-      const t = e.changedTouches[0]
-      // Only detect swipes starting within right EDGE_WIDTH
-      if (window.innerWidth - t.clientX > EDGE_WIDTH) return
-      startRef.current = { x: t.clientX, t: Date.now() }
+      const t = e.touches[0]
+      startRef.current = { x: t.clientX, y: t.clientY, t: Date.now() }
     }
 
     function onTouchEnd(e) {
       if (!startRef.current) return
       const t = e.changedTouches[0]
-      const dx = startRef.current.x - t.clientX
+      const dx = t.clientX - startRef.current.x
+      const dy = Math.abs(t.clientY - startRef.current.y)
       const dt = Date.now() - startRef.current.t
       startRef.current = null
-      if (dx > MIN_DELTA && dt < MAX_TIME) {
+
+      // left-to-right, mostly horizontal, fast enough
+      if (dx > MIN_DX && dy < MAX_DY && dt < MAX_MS) {
         onBack()
       }
     }
@@ -40,7 +42,7 @@ export default function SwipeBack({ children, onBack }) {
     }
   }, [onBack])
 
-  return <div ref={elRef} style={{ height: '100%', width: '100%' }}>
+  return <div ref={elRef} style={{ height: '100%', width: '100%', overflowX: 'hidden' }}>
     {children}
   </div>
 }
