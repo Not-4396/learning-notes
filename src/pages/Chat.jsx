@@ -25,8 +25,7 @@ export default function Chat({ onBack }) {
         const pairCount = Math.floor(history.length / 2)
         if (window.confirm(`你有 ${pairCount} 组历史对话，是否继续上次的知识旅程？`)) {
           setMessages(history.map(m => ({
-            role: m.role,
-            content: m.content,
+            role: m.role, content: m.content,
             html: m.role === 'assistant' ? markdownToHtml(m.content) : ''
           })))
         }
@@ -38,12 +37,9 @@ export default function Chat({ onBack }) {
     const text = inputText.trim()
     const u = getUser()
     if (!text || loading || !u) return
-
-    const msgs = [...messages, { role: 'user', content: text }]
-    setMessages(msgs)
+    setMessages(prev => [...prev, { role: 'user', content: text }])
     setInputText('')
     setLoading(true)
-
     sendMessage(text, u).then(res => {
       if (!res.ok) throw new Error(res.error)
       return pollWithTimeout(res.msg_id)
@@ -100,42 +96,31 @@ export default function Chat({ onBack }) {
   }
 
   return (
-    <div className="page" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <div style={{ background: '#4A90D9', color: 'white', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        {onBack && <span style={{ marginRight: 12, cursor: 'pointer' }} onClick={onBack}>&larr;</span>}
-        <span style={{ fontSize: 17, fontWeight: 'bold' }}>AI 学习助手</span>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <span style={{ cursor: 'pointer', fontSize: 14 }} onClick={() => { if (confirm('清空对话？')) setMessages([]) }}>清空</span>
-          <span style={{ cursor: 'pointer', fontSize: 14 }} onClick={handleGenerate}>{generating ? '生成中...' : '生成笔记'}</span>
+    <div className="page-flex">
+      <div className="topbar">
+        <span className="back" onClick={onBack}>&larr;</span>
+        <span className="title">AI 学习助手</span>
+        <div style={{ display: 'flex', gap: '0.6rem' }}>
+          <span className="action" onClick={() => { if (confirm('清空对话？')) setMessages([]) }}>清空</span>
+          <span className="action" onClick={handleGenerate}>{generating ? '生成中...' : '生成笔记'}</span>
         </div>
       </div>
 
-      <div style={{ flex: 1, overflow: 'auto', padding: 12, WebkitOverflowScrolling: 'touch' }}>
+      <div className="page-body">
         {messages.length === 0 && (
-          <div style={{ textAlign: 'center', padding: 60, color: '#999' }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>🤖</div>
-            <div style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 4 }}>你好！我是AI学习助手</div>
-            <div style={{ fontSize: 13 }}>有什么问题都可以问我</div>
+          <div className="empty">
+            <div className="icon">🤖</div>
+            <div style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>你好！我是AI学习助手</div>
+            <div style={{ fontSize: '0.8rem' }}>有什么问题都可以问我</div>
           </div>
         )}
 
         {messages.map((msg, idx) => (
-          <div key={idx} style={{ display: 'flex', flexDirection: msg.role === 'user' ? 'row-reverse' : 'row', marginBottom: 12, alignItems: 'flex-start' }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 12, fontWeight: 'bold', flexShrink: 0,
-              background: msg.role === 'user' ? '#4A90D9' : msg.role === 'error' ? '#D94A4A' : '#5BA85B',
-              color: 'white'
-            }}>
+          <div key={idx} className={`msg-row ${msg.role === 'user' ? 'user' : ''}`}>
+            <div className={`msg-avatar ${msg.role === 'user' ? 'user' : msg.role === 'error' ? 'error' : 'ai'}`}>
               {msg.role === 'user' ? '我' : msg.role === 'error' ? '!' : 'AI'}
             </div>
-            <div style={{
-              maxWidth: '75%', margin: '0 8px', padding: '10px 14px', borderRadius: 12,
-              background: msg.role === 'user' ? '#4A90D9' : msg.role === 'error' ? '#fff3f3' : 'white',
-              color: msg.role === 'user' ? 'white' : '#333',
-              fontSize: 14, lineHeight: 1.6,
-              boxShadow: msg.role !== 'user' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
-            }}>
+            <div className={`msg-bubble ${msg.role === 'user' ? 'user' : msg.role === 'error' ? 'error' : 'ai'}`}>
               {msg.role === 'user' ? msg.content : (
                 msg.html ? <div dangerouslySetInnerHTML={{ __html: msg.html }} /> : msg.content
               )}
@@ -144,27 +129,20 @@ export default function Chat({ onBack }) {
         ))}
 
         {loading && (
-          <div style={{ display: 'flex', marginBottom: 12 }}>
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#5BA85B', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 'bold', color: 'white', flexShrink: 0 }}>AI</div>
-            <div style={{ marginLeft: 8, padding: '10px 14px', borderRadius: 12, background: 'white', fontSize: 14, color: '#999' }}>思考中...</div>
+          <div className="msg-row">
+            <div className="msg-avatar ai">AI</div>
+            <div className="msg-bubble ai" style={{ color: '#999' }}>思考中...</div>
           </div>
         )}
-
         <div ref={bottomRef} />
       </div>
 
-      <div style={{ display: 'flex', padding: '10px 12px', gap: 8, background: 'white', borderTop: '1px solid #eee', paddingBottom: 'calc(10px + env(safe-area-inset-bottom, 0px))' }}>
-        <input
-          className="input-field"
-          placeholder="输入你的问题..."
-          value={inputText}
+      <div className="input-row">
+        <input className="chat-input" placeholder="输入你的问题..." value={inputText}
           onChange={e => setInputText(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSend()}
-          disabled={loading}
-        />
-        <button className="btn" onClick={handleSend} disabled={loading || !inputText.trim()} style={{ padding: '10px 20px', borderRadius: 20, opacity: loading ? 0.5 : 1 }}>
-          发送
-        </button>
+          disabled={loading} />
+        <button className="btn" onClick={handleSend} disabled={loading || !inputText.trim()}>发送</button>
       </div>
     </div>
   )

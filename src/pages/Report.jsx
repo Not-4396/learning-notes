@@ -13,8 +13,7 @@ export default function Report({ date, userInfo, onBack }) {
     setLoading(true)
     try {
       const res = await getDailyReport(date, userInfo.openid)
-      if (res.ok) setTree(res.data.tree)
-      else setTree(null)
+      if (res.ok) setTree(res.data.tree); else setTree(null)
     } catch (err) { console.error(err); setTree(null) }
     finally { setLoading(false) }
   }
@@ -33,7 +32,7 @@ export default function Report({ date, userInfo, onBack }) {
           await navigator.clipboard.writeText(`${location.origin}/#/share/${res.share_token}`)
           alert(`分享链接已复制:\nToken: ${res.share_token}`)
         }
-      } else { alert('生成失败: ' + (res.error || '')) }
+      }
     } catch (err) { alert('分享失败: ' + err.message) }
   }
 
@@ -42,13 +41,11 @@ export default function Report({ date, userInfo, onBack }) {
     try {
       const res = await generateSummary(date, userInfo.openid)
       if (res.ok) { alert('已开始重新生成，请稍后刷新'); setTimeout(loadReport, 2000) }
-      else { alert('生成失败: ' + (res.error || '')) }
     } catch (err) { alert('生成失败: ' + err.message) }
   }
 
   function downloadMarkdown() {
-    if (!tree) return
-    setShowDownload(false)
+    if (!tree) return; setShowDownload(false)
     let md = ''
     function walk(node, depth) {
       if (depth === 0) { md += `# ${node.label || '学习笔记'}\n\n` }
@@ -66,35 +63,31 @@ export default function Report({ date, userInfo, onBack }) {
 
   return (
     <div className="page">
-      <div style={{ background: '#4A90D9', color: 'white', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 17, fontWeight: 'bold', cursor: 'pointer' }} onClick={onBack}>&larr; {date}</span>
-        <span style={{ fontSize: 14 }}>{tree?.children?.length || 0} 个主题</span>
+      <div className="topbar">
+        <span className="back" onClick={onBack}>&larr; {date}</span>
+        <span style={{ fontSize: '0.85rem' }}>{tree?.children?.length || 0} 个主题</span>
       </div>
-
       {loading ? (
-        <div style={{ textAlign: 'center', padding: 60, color: '#999' }}>加载中...</div>
+        <div className="loading-text">加载中...</div>
       ) : tree ? (
         <>
-          <div style={{ padding: '8px 0' }}>
-            <MindMap tree={tree} onLeafTap={handleLeafTap} />
-          </div>
-          <div style={{ display: 'flex', gap: 10, padding: '12px 16px', justifyContent: 'center' }}>
+          <div style={{ padding: '0.5rem 0' }}><MindMap tree={tree} onLeafTap={handleLeafTap} /></div>
+          <div className="action-row">
             <button className="btn" onClick={handleShare}>分享</button>
             <button className="btn secondary" onClick={() => setShowDownload(!showDownload)}>下载</button>
             <button className="btn secondary" onClick={handleRegenerate}>重新生成</button>
           </div>
           {showDownload && (
-            <div style={{ margin: '0 16px', background: 'white', borderRadius: 12, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-              <button style={{ width: '100%', padding: 14, border: 'none', borderBottom: '1px solid #eee', background: 'white', fontSize: 14, cursor: 'pointer' }} onClick={downloadMarkdown}>导出思维导图(Markdown)</button>
-              <button style={{ width: '100%', padding: 14, border: 'none', background: 'white', fontSize: 14, cursor: 'pointer' }} onClick={() => { setShowDownload(false); location.hash = `#/topic/${date}/${tree.id || 'root'}?label=${encodeURIComponent(tree.label || '')}` }}>查看文字版</button>
+            <div className="sheet">
+              <button onClick={downloadMarkdown}>导出思维导图(Markdown)</button>
+              <button onClick={() => { setShowDownload(false); location.hash = `#/topic/${date}/${tree.id || 'root'}?label=${encodeURIComponent(tree.label || '')}` }}>查看文字版</button>
             </div>
           )}
         </>
       ) : (
-        <div style={{ textAlign: 'center', padding: 60, color: '#999' }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>📄</div>
-          <div>暂无数据</div>
-          <button className="btn" style={{ marginTop: 20 }} onClick={handleRegenerate}>生成笔记</button>
+        <div className="empty">
+          <div className="icon">📄</div><div>暂无数据</div>
+          <button className="btn" style={{ marginTop: '1rem' }} onClick={handleRegenerate}>生成笔记</button>
         </div>
       )}
     </div>

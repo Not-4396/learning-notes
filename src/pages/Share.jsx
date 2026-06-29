@@ -7,33 +7,26 @@ export default function Share({ token }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
-    if (token) loadShared(token)
-  }, [token])
+  useEffect(() => { if (token) loadShared(token) }, [token])
 
   async function loadShared(t) {
     try {
       const res = await getSharedReport(t)
       if (res.error) { setError(res.error); return }
       if (res.ok && res.data) { setTree(res.data.tree) }
-    } catch (err) {
-      setError('加载失败: ' + err.message)
-    } finally { setLoading(false) }
+    } catch (err) { setError('加载失败: ' + err.message) }
+    finally { setLoading(false) }
   }
 
-  if (loading) return <div className="page"><div style={{ textAlign: 'center', padding: 60, color: '#999' }}>加载中...</div></div>
-  if (error) return <div className="page"><div style={{ textAlign: 'center', padding: 60, color: '#999' }}><div style={{ fontSize: 40, marginBottom: 12 }}>🔒</div><div>{error}</div></div></div>
+  if (loading) return <div className="page"><div className="loading-text">加载中...</div></div>
+  if (error) return <div className="page"><div className="empty"><div className="icon">🔒</div><div>{error}</div></div></div>
 
   return (
     <div className="page">
-      <div style={{ background: '#4A90D9', color: 'white', padding: '12px 16px', textAlign: 'center' }}>
-        <span style={{ fontSize: 17, fontWeight: 'bold' }}>分享的学习日报</span>
+      <div className="topbar">
+        <span className="title">分享的学习日报</span>
       </div>
-      {tree && (
-        <div style={{ padding: '8px 0' }}>
-          <MindMap tree={tree} />
-        </div>
-      )}
+      {tree && <div style={{ padding: '0.5rem 0' }}><MindMap tree={tree} /></div>}
     </div>
   )
 }

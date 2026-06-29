@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react'
 import { getDailyReport } from '../utils/api'
 import { getUser } from '../hooks/useAuth'
 
-export default function Topic({ date, topicId, searchParams: sp, onBack }) {
-  const [label, setLabel] = useState(sp?.get('label') || '')
-  const [detail, setDetail] = useState(sp?.get('detail') || '')
+export default function Topic({ date, topicId, onBack }) {
+  const params = new URLSearchParams(location.hash.split('?')[1] || '')
+  const [label, setLabel] = useState(params.get('label') || '')
+  const [detail, setDetail] = useState(params.get('detail') || '')
   const [children, setChildren] = useState([])
   const [excerpts, setExcerpts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -14,8 +15,7 @@ export default function Topic({ date, topicId, searchParams: sp, onBack }) {
   async function loadDetail() {
     setLoading(true)
     try {
-      const u = getUser()
-      if (!u) return
+      const u = getUser(); if (!u) return
       const res = await getDailyReport(date, u.openid)
       if (res.ok) {
         const topic = findNode(res.data.tree, topicId)
@@ -32,60 +32,49 @@ export default function Topic({ date, topicId, searchParams: sp, onBack }) {
 
   function findNode(node, targetId) {
     if (node.id === targetId) return node
-    if (node.children) {
-      for (const c of node.children) {
-        const found = findNode(c, targetId)
-        if (found) return found
-      }
-    }
+    if (node.children) for (const c of node.children) { const f = findNode(c, targetId); if (f) return f }
     return null
+  }
+
+  const goTopic = (dt, tid, lbl, dtl) => {
+    location.hash = `#/topic/${dt}/${tid}?label=${encodeURIComponent(lbl || '')}&detail=${encodeURIComponent(dtl || '')}`
   }
 
   return (
     <div className="page">
-      <div style={{ background: '#4A90D9', color: 'white', padding: '12px 16px', display: 'flex', alignItems: 'center' }}>
-        <span style={{ marginRight: 12, cursor: 'pointer' }} onClick={onBack}>&larr;</span>
-        <span style={{ fontSize: 16, fontWeight: 'bold' }}>{decodeURIComponent(label)}</span>
+      <div className="topbar">
+        <span className="back" onClick={onBack}>&larr;</span>
+        <span className="title" style={{ flex: 1, marginLeft: '0.5rem' }}>{decodeURIComponent(label)}</span>
       </div>
-
-      <div style={{ padding: 16 }}>
+      <div style={{ padding: '1rem' }}>
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>加载中...</div>
+          <div className="loading-text">加载中...</div>
         ) : (
           <>
-            {detail && (
-              <div style={{ background: '#f0f7ff', padding: 14, borderRadius: 10, marginBottom: 16, fontSize: 14, lineHeight: 1.7, color: '#444', borderLeft: '3px solid #4A90D9' }}>
-                {decodeURIComponent(detail)}
-              </div>
-            )}
-
+            {detail && <div className="detail-box">{decodeURIComponent(detail)}</div>}
             {children.length > 0 && (
-              <div style={{ marginBottom: 16 }}>
-                <h4 style={{ fontSize: 14, color: '#4A90D9', marginBottom: 10 }}>子主题</h4>
+              <div style={{ marginBottom: '1rem' }}>
+                <h4 style={{ fontSize: '0.85rem', color: '#4A90D9', marginBottom: '0.6rem' }}>子主题</h4>
                 {children.map(child => (
-                  <div key={child.id} onClick={() => { location.hash = `#/topic/${date}/${child.id}?label=${encodeURIComponent(child.label || '')}&detail=${encodeURIComponent(child.detail || '')}` }}
-                    style={{ padding: '12px 14px', marginBottom: 6, background: 'white', borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                    <span style={{ fontSize: 14 }}>{child.label}</span>
-                    <span style={{ color: '#ccc' }}>&rarr;</span>
+                  <div key={child.id} className="subtopic" onClick={() => goTopic(date, child.id, child.label, child.detail)}>
+                    <span>{child.label}</span><span style={{ color: '#ccc' }}>&rarr;</span>
                   </div>
                 ))}
               </div>
             )}
-
             {excerpts.length > 0 && (
               <div>
-                <h4 style={{ fontSize: 14, color: '#4A90D9', marginBottom: 10 }}>相关对话</h4>
+                <h4 style={{ fontSize: '0.85rem', color: '#4A90D9', marginBottom: '0.6rem' }}>相关对话</h4>
                 {excerpts.map((ex, idx) => (
-                  <div key={idx} style={{ padding: 10, marginBottom: 6, background: 'white', borderRadius: 8, fontSize: 13, color: '#555', lineHeight: 1.6 }}>
-                    <span style={{ fontSize: 11, color: '#999', marginRight: 6 }}>[{ex.role === 'user' ? '用户' : 'AI'}]</span>
+                  <div key={idx} style={{ padding: '0.6rem', marginBottom: '0.35rem', background: '#fff', borderRadius: '0.5rem', fontSize: '0.8rem', color: '#555', lineHeight: 1.6 }}>
+                    <span style={{ fontSize: '0.7rem', color: '#999', marginRight: '0.35rem' }}>[{ex.role === 'user' ? '用户' : 'AI'}]</span>
                     {ex.content}
                   </div>
                 ))}
               </div>
             )}
-
             {!detail && children.length === 0 && excerpts.length === 0 && (
-              <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>暂无详情</div>
+              <div className="loading-text">暂无详情</div>
             )}
           </>
         )}

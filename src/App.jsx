@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { getUser } from './hooks/useAuth'
 import Login from './pages/Login'
 import Home from './pages/Home'
@@ -7,6 +7,7 @@ import History from './pages/History'
 import Report from './pages/Report'
 import Topic from './pages/Topic'
 import Share from './pages/Share'
+import SwipeBack from './components/SwipeBack'
 import './App.css'
 
 // ─── Global navigation — bypasses React props ───
@@ -72,20 +73,24 @@ export default function App() {
     return <Login onLogin={() => { location.hash = '#/home'; setScreen({ page: 'home' }) }} />
   }
   if (screen.page === 'chat') {
-    return <Chat onBack={() => setScreen({ page: 'home' })} />
+    const goHome = () => setScreen({ page: 'home' })
+    return <SwipeBack onBack={goHome}><Chat onBack={goHome} /></SwipeBack>
   }
   if (screen.page === 'history') {
-    return <History onBack={() => setScreen({ page: 'home' })} />
+    const goHome = () => setScreen({ page: 'home' })
+    return <SwipeBack onBack={goHome}><History onBack={goHome} /></SwipeBack>
   }
   if (screen.page === 'report') {
     const u = getUser()
     if (!u) return <Login onLogin={() => setScreen({ page: 'home' })} />
-    return <Report date={screen.date} userInfo={u} onBack={() => setScreen({ page: 'home' })} />
+    const goHome = () => setScreen({ page: 'home' })
+    return <SwipeBack onBack={goHome}><Report date={screen.date} userInfo={u} onBack={goHome} /></SwipeBack>
   }
   if (screen.page === 'topic') {
     const u = getUser()
     if (!u) return <Login onLogin={() => setScreen({ page: 'home' })} />
-    return <Topic date={screen.date} topicId={screen.topicId} onBack={() => setScreen({ page: 'report', date: screen.date })} />
+    const goBack = () => setScreen({ page: 'report', date: screen.date })
+    return <SwipeBack onBack={goBack}><Topic date={screen.date} topicId={screen.topicId} onBack={goBack} /></SwipeBack>
   }
   if (screen.page === 'share') {
     return <Share token={screen.token} />
