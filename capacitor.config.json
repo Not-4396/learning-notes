@@ -1,0 +1,10 @@
+{
+  "appId": "com.learningnotes.app",
+  "appName": "学习笔记",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "allowNavigation": ["localhost", "10.0.2.2", "192.168.*"]
+  }
+}
