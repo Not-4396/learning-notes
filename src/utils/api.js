@@ -1,6 +1,5 @@
-// All data operations now go through the backend REST API
-// Vite proxies /api → localhost:3001 in dev
-const BACKEND_URL = ''
+// Dev: Vite proxies /api → localhost:3001. Prod: use Render cloud
+const BACKEND_URL = import.meta.env.DEV ? '' : 'https://learning-notes-api.onrender.com'
 
 async function request(method, path, body) {
   const opts = { method, headers: { 'Content-Type': 'application/json' } }
