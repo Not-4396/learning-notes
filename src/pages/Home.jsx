@@ -4,7 +4,7 @@ import { getSummaryList, getUserScores, generateSummary, pollGenerate } from '..
 import { formatDate, getToday } from '../utils/date'
 import RadarChart from '../components/RadarChart'
 
-export default function Home({ onChat, onHistory, onLogout, onUpdateNickname, userInfo }) {
+export default function Home({ userInfo }) {
   const [dates, setDates] = useState([])
   const [scores, setScores] = useState({})
   const [loading, setLoading] = useState(true)
@@ -95,11 +95,16 @@ export default function Home({ onChat, onHistory, onLogout, onUpdateNickname, us
     const action = prompt('1. 修改昵称\n2. 退出登录\n输入 1 或 2:')
     if (action === '1') {
       const newName = prompt('输入新昵称:', userInfo?.nickName)
-      if (newName && newName.trim() && onUpdateNickname) onUpdateNickname(newName.trim())
+      if (newName && newName.trim() && window.__nav) window.__nav.updateNickname(newName.trim())
     } else if (action === '2') {
-      if (confirm('确定要退出登录吗？') && onLogout) onLogout()
+      if (confirm('确定要退出登录吗？') && window.__nav) window.__nav.logout()
     }
   }
+
+  // Direct callbacks — no prop drilling
+  const goChat = () => window.__nav && window.__nav.chat()
+  const goHistory = () => window.__nav && window.__nav.history()
+  const goReport = (dateKey) => { location.hash = '#/report/' + dateKey; window.__nav && window.__nav.report(dateKey) }
 
   return (
     <div className="page">
@@ -117,9 +122,20 @@ export default function Home({ onChat, onHistory, onLogout, onUpdateNickname, us
       </div>
 
       <div style={{ display: 'flex', gap: 10, padding: '16px', justifyContent: 'center' }}>
-        <button className="btn" onClick={onChat}>AI 对话</button>
-        <button className="btn secondary" onClick={handleGeneratePress} disabled={generating}>{generating ? '生成中...' : '生成笔记'}</button>
-        <button className="btn secondary" onClick={onHistory}>历史笔记</button>
+        <button className="btn"
+          onClick={goChat}
+          onTouchStart={goChat}
+          style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation', userSelect: 'none' }}
+        >AI 对话</button>
+        <button className="btn secondary"
+          onClick={handleGeneratePress}
+          disabled={generating}
+        >{generating ? '生成中...' : '生成笔记'}</button>
+        <button className="btn secondary"
+          onClick={goHistory}
+          onTouchStart={goHistory}
+          style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation', userSelect: 'none' }}
+        >历史笔记</button>
       </div>
 
       {userInfo && (
@@ -137,7 +153,7 @@ export default function Home({ onChat, onHistory, onLogout, onUpdateNickname, us
       {dates.length > 0 ? (
         <div style={{ padding: '0 16px' }}>
           {dates.map(item => (
-            <div key={item.date_key} onClick={() => { location.hash = '#/report/' + item.date_key }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', marginBottom: 8, background: 'white', borderRadius: 12, cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+            <div key={item.date_key} onClick={() => goReport(item.date_key)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', marginBottom: 8, background: 'white', borderRadius: 12, cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
               <div>
                 <div style={{ fontSize: 15, fontWeight: 500 }}>{item.display_date}</div>
                 <div style={{ fontSize: 12, color: '#999' }}>{item.date_key}</div>
