@@ -20,8 +20,7 @@
     "better-sqlite3": "^12.11.1",
     "express": "^5.2.1",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7",
-    "react-router-dom": "^7.18.0"
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",
