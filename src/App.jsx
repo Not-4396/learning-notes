@@ -10,9 +10,15 @@ import Share from './pages/Share'
 import './App.css'
 
 function ProtectedRoute({ children }) {
-  // Uses module-level cache — 100% synchronous, zero chance of flash
   if (!getUser()) return <Navigate to="/login" replace />
   return children
+}
+
+// Chat route: plain function, no React hooks — works even when
+// Capacitor WebView races component mount vs state hydration
+function ChatRoute() {
+  if (!getUser()) return <Navigate to="/login" replace />
+  return <Chat />
 }
 
 export default function App() {
@@ -22,7 +28,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-          <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+          <Route path="/chat" element={<ChatRoute />} />
           <Route path="/report/:date" element={<ProtectedRoute><Report /></ProtectedRoute>} />
           <Route path="/topic/:date/:topicId" element={<ProtectedRoute><Topic /></ProtectedRoute>} />
           <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />

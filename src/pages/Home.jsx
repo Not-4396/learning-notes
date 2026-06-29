@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { getSummaryList, getUserScores, generateSummary, pollGenerate } from '../utils/api'
 import { formatDate, getToday } from '../utils/date'
 import RadarChart from '../components/RadarChart'
 
+function nav(path) { location.hash = '#' + path }
+
 export default function Home() {
   const { userInfo, logout, updateNickname } = useAuth()
-  const navigate = useNavigate()
   const [dates, setDates] = useState([])
   const [scores, setScores] = useState({})
   const [loading, setLoading] = useState(true)
@@ -117,9 +117,9 @@ export default function Home() {
       </div>
 
       <div style={{ display: 'flex', gap: 10, padding: '16px', justifyContent: 'center' }}>
-        <button className="btn" onClick={() => navigate('/chat')}>AI 对话</button>
+        <button className="btn" onClick={() => nav('/chat')}>AI 对话</button>
         <button className="btn secondary" onClick={handleGeneratePress} disabled={generating}>{generating ? '生成中...' : '生成笔记'}</button>
-        <button className="btn secondary" onClick={() => navigate('/history')}>历史笔记</button>
+        <button className="btn secondary" onClick={() => nav('/history')}>历史笔记</button>
       </div>
 
       {userInfo && (
@@ -137,7 +137,7 @@ export default function Home() {
       {dates.length > 0 ? (
         <div style={{ padding: '0 16px' }}>
           {dates.map(item => (
-            <div key={item.date_key} onClick={() => navigate(`/report/${item.date_key}`)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', marginBottom: 8, background: 'white', borderRadius: 12, cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+            <div key={item.date_key} onClick={() => nav(`/report/${item.date_key}`)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', marginBottom: 8, background: 'white', borderRadius: 12, cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
               <div>
                 <div style={{ fontSize: 15, fontWeight: 500 }}>{item.display_date}</div>
                 <div style={{ fontSize: 12, color: '#999' }}>{item.date_key}</div>

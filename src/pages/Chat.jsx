@@ -1,13 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
+import { getUser } from '../hooks/useAuth'
 import { sendMessage, pollReply, getChatHistory, generateSummary, pollGenerate } from '../utils/api'
 import { markdownToHtml } from '../utils/markdown'
 import { getToday } from '../utils/date'
 
 export default function Chat() {
-  const { userInfo } = useAuth()
-  const navigate = useNavigate()
   const [messages, setMessages] = useState([])
   const [inputText, setInputText] = useState('')
   const [loading, setLoading] = useState(false)
@@ -15,16 +12,15 @@ export default function Chat() {
   const bottomRef = useRef(null)
 
   useEffect(() => {
-    // ProtectedRoute already guards auth; don't redirect here
-    // (Capacitor WebView sometimes races React state)
-    if (userInfo) checkHistory()
+    const u = getUser()
+    if (u) checkHistory(u)
   }, [])
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
-  async function checkHistory() {
+  async function checkHistory(u) {
     try {
-      const history = await getChatHistory(userInfo.openid, 50)
+      const history = await getChatHistory(u.openid, 50)
       if (history.length > 0) {
         const pairCount = Math.floor(history.length / 2)
         if (window.confirm(`你有 ${pairCount} 组历史对话，是否继续上次的知识旅程？`)) {
@@ -40,14 +36,15 @@ export default function Chat() {
 
   function handleSend() {
     const text = inputText.trim()
-    if (!text || loading) return
+    const u = getUser()
+    if (!text || loading || !u) return
 
     const msgs = [...messages, { role: 'user', content: text }]
     setMessages(msgs)
     setInputText('')
     setLoading(true)
 
-    sendMessage(text, userInfo).then(res => {
+    sendMessage(text, u).then(res => {
       if (!res.ok) throw new Error(res.error)
       return pollWithTimeout(res.msg_id)
     }).then(reply => {
@@ -76,9 +73,11 @@ export default function Chat() {
   }
 
   async function handleGenerate() {
+    const u = getUser()
+    if (!u) return
     setGenerating(true)
     try {
-      const res = await generateSummary(getToday(), userInfo.openid)
+      const res = await generateSummary(getToday(), u.openid)
       if (!res.ok) throw new Error(res.error)
       const result = await new Promise((resolve, reject) => {
         let count = 0
