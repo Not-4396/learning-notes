@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: learning-notes-api
+    env: node
+    rootDir: .
+    buildCommand: cd server && npm install
+    startCommand: node server/index.js
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: DS_API_KEY
+        sync: false
+    healthCheckPath: /api/health
+    plan: free
