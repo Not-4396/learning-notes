@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { HashRouter, Routes, Route, Navigate, useParams, useSearchParams } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth, getUser } from './hooks/useAuth'
 import Login from './pages/Login'
 import Home from './pages/Home'
