@@ -1,5 +1,5 @@
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useAuth } from './hooks/useAuth'
+import { getUser } from './hooks/useAuth'
 import Login from './pages/Login'
 import Home from './pages/Home'
 import Chat from './pages/Chat'
@@ -10,8 +10,8 @@ import Share from './pages/Share'
 import './App.css'
 
 function ProtectedRoute({ children }) {
-  const { userInfo } = useAuth()
-  if (!userInfo) return <Navigate to="/login" replace />
+  // Uses module-level cache — 100% synchronous, zero chance of flash
+  if (!getUser()) return <Navigate to="/login" replace />
   return children
 }
 

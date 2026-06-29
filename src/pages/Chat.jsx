@@ -15,8 +15,9 @@ export default function Chat() {
   const bottomRef = useRef(null)
 
   useEffect(() => {
-    if (!userInfo) { navigate('/login'); return }
-    checkHistory()
+    // ProtectedRoute already guards auth; don't redirect here
+    // (Capacitor WebView sometimes races React state)
+    if (userInfo) checkHistory()
   }, [])
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
