@@ -1,17 +1,28 @@
 <!DOCTYPE html>
-<html lang="zh-CN" style="font-size:14px">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#4A90D9" />
-    <title>学习笔记 v3</title>
+    <title>学习笔记 v5</title>
     <script>
-      // Real responsive: scale base font-size continuously based on viewport width.
-      // Design reference: 375px → 16px. Clamps between 13px and 20px.
+      // Continuously scale base font-size based on screen width AND height.
+      // Uses the shorter dimension so tall phones don't get oversized text.
+      // Design reference: iPhone SE (375×667) → 16px base.
+      // Clamped 13–22px. Re-runs on resize (foldable / orientation change).
       (function(){
-        var w = window.innerWidth || document.documentElement.clientWidth || 375;
-        var fs = Math.min(Math.max(w / 375 * 16, 13), 20);
-        document.documentElement.style.fontSize = Math.round(fs * 10) / 10 + 'px';
+        var designMin = 375; // shortest side of reference device
+        function recalc() {
+          var w = window.innerWidth || document.documentElement.clientWidth || 375;
+          var h = window.innerHeight || document.documentElement.clientHeight || 667;
+          var short = Math.min(w, h);
+          var fs = Math.round(short / designMin * 160) / 10;
+          fs = Math.min(Math.max(fs, 13), 22);
+          document.documentElement.style.fontSize = fs + 'px';
+        }
+        recalc();
+        window.addEventListener('resize', recalc);
+        window.addEventListener('orientationchange', function(){ setTimeout(recalc, 100); });
       })();
     </script>
   </head>
